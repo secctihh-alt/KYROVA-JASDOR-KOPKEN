@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYROVA - Jasa Order Kopi Kenangan Terpercaya</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        kopken: {
+                            dark: '#0f0f0f',
+                            card: '#18181b',
+                            accent: '#D4AF37', // Emas Elegan Kopi Kenangan
+                            goldlight: '#F3E5AB',
+                            cream: '#FAFAFA',
+                            graydark: '#27272a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0f0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 3px;
+        }
+        .qris-pattern {
+            background-image: radial-gradient(#D4AF37 0.75px, transparent 0.75px);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="bg-kopken-dark text-kopken-cream font-sans min-h-screen flex flex-col selection:bg-kopken-accent selection:text-black">
+
+    <!-- WELCOME / INITIAL SETUP MODAL -->
+    <div id="welcomeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="bg-kopken-card border border-kopken-accent/30 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-kopken-accent/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-kopken-accent/10 border border-kopken-accent/40 text-kopken-accent text-2xl font-bold mb-3 shadow-inner">
+                    <i class="fa-solid fa-mug-hot"></i>
+                </div>
+                <h2 class="text-2xl font-bold tracking-tight text-white">Selamat Datang di <span class="text-kopken-accent">KYROVA</span></h2>
+                <p class="text-xs sm:text-sm text-gray-400 mt-1">Jasa Titip & Order Kopi Kenangan Resmi & Terpercaya</p>
+            </div>
+
+            <form id="initialForm" onsubmit="saveInitialData(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Nama Pemesan</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-regular fa-user"></i></span>
+                        <input type="text" id="custName" required placeholder="Contoh: Budi Santoso" 
+                            class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 pl-10 text-sm text-white focus:outline-none focus:border-kopken-accent transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Nomor WhatsApp</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-brands fa-whatsapp"></i></span>
+                        <input type="tel" id="custPhone" required placeholder="Contoh: 081234567890" 
+                            class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 pl-10 text-sm text-white focus:outline-none focus:border-kopken-accent transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Pilih Store Kopi Kenangan (DKI Jakarta)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500"><i class="fa-solid fa-store"></i></span>
+                        <input type="text" id="storeSearchInput" placeholder="Cari store (cth: Cakung, JGC, Metland, Grand Indonesia...)" oninput="filterStores()" 
+                            class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 pl-10 text-sm text-white focus:outline-none focus:border-kopken-accent transition mb-2">
+                    </div>
+                    <div id="storeListContainer" class="max-h-40 overflow-y-auto space-y-1.5 border border-gray-800 rounded-xl p-2 bg-black/40">
+                        <!-- Store items injected via JS -->
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-bold py-3.5 px-4 rounded-xl shadow-lg transition transform active:scale-[0.98] flex items-center justify-center gap-2">
+                    <span>Mulai Pesan Sekarang</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN NAVBAR & APP HEADER -->
+    <header class="sticky top-0 z-40 bg-kopken-dark/95 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+            <!-- Store Pill Header -->
+            <button onclick="openWelcomeModal()" class="flex items-center gap-3 bg-kopken-card hover:bg-gray-800 border border-gray-800 px-4 py-2 rounded-2xl text-left transition max-w-[240px] sm:max-w-sm">
+                <div class="w-8 h-8 rounded-xl bg-kopken-accent/10 flex items-center justify-center text-kopken-accent flex-shrink-0">
+                    <i class="fa-solid fa-location-dot text-xs"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <div class="text-[10px] text-gray-400 font-medium uppercase tracking-wider flex items-center gap-1">
+                        <span>Pesan di Store</span>
+                        <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                    </div>
+                    <div id="headerStoreName" class="font-bold text-xs sm:text-sm text-white truncate">Pilih Store Kopi Kenangan</div>
+                </div>
+            </button>
+
+            <!-- Actions Right -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="openWifiModal()" class="bg-kopken-card hover:bg-gray-800 border border-gray-800 px-3 py-2 rounded-xl text-gray-300 hover:text-kopken-accent transition flex items-center gap-1.5 text-xs font-medium" title="Wi-Fi">
+                    <i class="fa-solid fa-wifi text-kopken-accent"></i>
+                    <span class="hidden md:inline">Wi-Fi</span>
+                </button>
+
+                <button onclick="openAdminPinModal()" class="bg-kopken-card hover:bg-gray-800 border border-gray-800 px-3 py-2 rounded-xl text-gray-300 hover:text-kopken-accent transition flex items-center gap-1.5 text-xs font-medium" title="Admin">
+                    <i class="fa-solid fa-lock text-kopken-accent"></i>
+                    <span class="hidden md:inline">Admin Panel</span>
+                </button>
+
+                <button onclick="toggleCartDrawer(true)" class="relative bg-kopken-accent hover:bg-amber-400 text-black font-bold px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-md text-xs sm:text-sm">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="hidden sm:inline">Keranjang</span>
+                    <span id="cartBadge" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-kopken-dark hidden">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- CATEGORY TABS -->
+        <div class="bg-kopken-dark/95 border-t border-gray-800/60 overflow-x-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 py-2.5 no-scrollbar" id="categoryTabs">
+                <button onclick="filterCategory('Promo & Combo')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-card border border-gray-800 text-gray-300 hover:text-white transition whitespace-nowrap">Promo & Combo</button>
+                <button onclick="filterCategory('Baru!')" class="cat-btn active px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-accent text-black transition whitespace-nowrap">Baru!</button>
+                <button onclick="filterCategory('Coffee')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-card border border-gray-800 text-gray-300 hover:text-white transition whitespace-nowrap">Coffee</button>
+                <button onclick="filterCategory('Non Coffee')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-card border border-gray-800 text-gray-300 hover:text-white transition whitespace-nowrap">Non Coffee</button>
+                <button onclick="filterCategory('Kenangan Frappe')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-card border border-gray-800 text-gray-300 hover:text-white transition whitespace-nowrap">Kenangan Frappe</button>
+                <button onclick="filterCategory('Makanan')" class="cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-card border border-gray-800 text-gray-300 hover:text-white transition whitespace-nowrap">Makanan</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTENT -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        <!-- Store Closed Banner -->
+        <div id="storeClosedBanner" class="hidden mb-6 bg-red-950/80 border border-red-800 text-red-200 p-4 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-xl text-red-400"></i>
+                <div>
+                    <h4 class="font-bold text-sm">Toko Sedang Tutup / Offline</h4>
+                    <p class="text-xs text-red-300">Maaf, saat ini layanan order sedang tidak aktif. Anda tetap dapat melihat menu.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h3 id="categoryTitleHeader" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Baru!</h3>
+            <p id="categorySubtitleDesc" class="text-xs text-gray-400 mt-0.5">Nikmati varian menu terbaru yang menyegarkan hari-harimu</p>
+        </div>
+
+        <!-- MENU GRID -->
+        <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <!-- Dynamically rendered menu items -->
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-kopken-card border-t border-gray-800 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-kopken-accent/10 border border-kopken-accent/30 flex items-center justify-center text-kopken-accent font-bold text-sm">
+                    K
+                </div>
+                <div>
+                    <p class="font-bold text-sm text-white">KYROVA Jasa Order Kopi Kenangan</p>
+                    <p class="text-[11px] text-gray-400">Jastip & Pesan Antar Kopi Kenangan Resmi & Terpercaya di DKI Jakarta.</p>
+                </div>
+            </div>
+            <div class="text-xs text-gray-400">
+                &copy; 2026 KYROVA. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- PRODUCT CUSTOMIZATION MODAL -->
+    <div id="customModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 hidden">
+        <div class="bg-kopken-card border border-gray-800 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative">
+            <button onclick="closeCustomModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex gap-4 items-center mb-6">
+                <img id="modalItemImg" src="" alt="Menu" class="w-20 h-20 object-cover rounded-2xl border border-gray-700 bg-black/40">
+                <div>
+                    <span id="modalItemCategory" class="text-[10px] uppercase font-bold tracking-wider text-kopken-accent bg-kopken-accent/10 px-2 py-0.5 rounded-md">Category</span>
+                    <h3 id="modalItemName" class="text-lg font-bold text-white mt-1">Nama Menu</h3>
+                    <p id="modalItemPrice" class="text-kopken-accent font-semibold text-sm">Rp 0</p>
+                </div>
+            </div>
+
+            <form id="customForm" onsubmit="addToCartFromModal(event)" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                <input type="hidden" id="modalItemId">
+
+                <!-- Size Option -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Ukuran (Size)</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="itemSize" value="Reguler" checked class="peer sr-only" onchange="updateModalPrice()">
+                            <div class="p-3 text-center rounded-xl bg-kopken-graydark border border-gray-700 peer-checked:border-kopken-accent peer-checked:bg-kopken-accent/10 peer-checked:text-kopken-accent text-xs font-medium transition">
+                                Reguler <span class="block text-[10px] text-gray-400">Harga Standar</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="itemSize" value="Large" class="peer sr-only" onchange="updateModalPrice()">
+                            <div class="p-3 text-center rounded-xl bg-kopken-graydark border border-gray-700 peer-checked:border-kopken-accent peer-checked:bg-kopken-accent/10 peer-checked:text-kopken-accent text-xs font-medium transition">
+                                Large <span class="block text-[10px] text-gray-400">+Rp 5.000</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Sugar Option -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Opsi Gula (Sugar)</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="itemSugar" value="Normal Sugar" checked class="peer sr-only">
+                            <div class="p-2.5 text-center rounded-xl bg-kopken-graydark border border-gray-700 peer-checked:border-kopken-accent peer-checked:bg-kopken-accent/10 peer-checked:text-kopken-accent text-xs font-medium transition">
+                                Normal
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="itemSugar" value="Less Sugar (50%)" class="peer sr-only">
+                            <div class="p-2.5 text-center rounded-xl bg-kopken-graydark border border-gray-700 peer-checked:border-kopken-accent peer-checked:bg-kopken-accent/10 peer-checked:text-kopken-accent text-xs font-medium transition">
+                                Less Sugar
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="itemSugar" value="No Sugar (0%)" class="peer sr-only">
+                            <div class="p-2.5 text-center rounded-xl bg-kopken-graydark border border-gray-700 peer-checked:border-kopken-accent peer-checked:bg-kopken-accent/10 peer-checked:text-kopken-accent text-xs font-medium transition">
+                                No Sugar
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Ice Option -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Opsi Es (Ice)</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="itemIce" value="Normal Ice" checked class="peer sr-only">
+                            <div class="p-2.5 text-center rounded-xl bg-kopken-graydark border border-gray-700 peer-checked:border-kopken-accent peer-checked:bg-kopken-accent/10 peer-checked:text-kopken-accent text-xs font-medium transition">
+                                Normal Ice
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="itemIce" value="Less Ice" class="peer sr-only">
+                            <div class="p-2.5 text-center rounded-xl bg-kopken-graydark border border-gray-700 peer-checked:border-kopken-accent peer-checked:bg-kopken-accent/10 peer-checked:text-kopken-accent text-xs font-medium transition">
+                                Less Ice
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="itemIce" value="No Ice (Hot/Separate)" class="peer sr-only">
+                            <div class="p-2.5 text-center rounded-xl bg-kopken-graydark border border-gray-700 peer-checked:border-kopken-accent peer-checked:bg-kopken-accent/10 peer-checked:text-kopken-accent text-xs font-medium transition">
+                                No Ice
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Catatan Tambahan (Opsional)</label>
+                    <input type="text" id="itemNote" placeholder="Cth: Jangan terlalu manis, bungkus terpisah..." 
+                        class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-kopken-accent transition">
+                </div>
+
+                <!-- Quantity -->
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Jumlah</span>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="adjustModalQty(-1)" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white font-bold">-</button>
+                        <span id="modalQty" class="font-bold text-sm text-white w-6 text-center">1</span>
+                        <button type="button" onclick="adjustModalQty(1)" class="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-white font-bold">+</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-4 bg-kopken-accent hover:bg-amber-400 text-black font-bold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-cart-plus"></i>
+                    <span>Tambah ke Keranjang - <span id="modalTotalPrice">Rp 0</span></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CART & CHECKOUT DRAWER -->
+    <div id="cartDrawer" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex justify-end hidden transition-opacity duration-300">
+        <div class="bg-kopken-card w-full max-w-md h-full flex flex-col border-l border-gray-800 shadow-2xl">
+            <!-- Header -->
+            <div class="p-5 border-b border-gray-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-cart-shopping text-kopken-accent"></i>
+                    <h3 class="font-bold text-white text-lg">Keranjang Pesanan</h3>
+                </div>
+                <button onclick="toggleCartDrawer(false)" class="text-gray-400 hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Customer & Store Summary Mini Card -->
+            <div class="bg-kopken-graydark p-4 mx-4 mt-4 rounded-2xl border border-gray-800 text-xs space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Pemesan:</span>
+                    <span id="cartCustSummary" class="font-bold text-white">-</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">WhatsApp:</span>
+                    <span id="cartPhoneSummary" class="font-bold text-white">-</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Store Tujuan:</span>
+                    <span id="cartStoreSummary" class="font-bold text-kopken-accent text-right truncate max-w-[200px]">-</span>
+                </div>
+            </div>
+
+            <!-- Cart Items List -->
+            <div id="cartItemsList" class="flex-grow overflow-y-auto p-4 space-y-3">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Cart Footer & Checkout -->
+            <div class="p-5 border-t border-gray-800 bg-kopken-dark space-y-3">
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between text-gray-400">
+                        <span>Subtotal Item</span>
+                        <span id="cartSubtotal">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span>Biaya Jastip & Layanan</span>
+                        <span id="cartServiceFee">Rp 5.000</span>
+                    </div>
+                    <div class="flex justify-between text-white font-bold text-sm pt-2 border-t border-gray-800">
+                        <span>Total Pembayaran</span>
+                        <span id="cartGrandTotal" class="text-kopken-accent">Rp 0</span>
+                    </div>
+                </div>
+
+                <button onclick="proceedToCheckout()" id="checkoutBtn" class="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-bold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>Lanjut ke Pembayaran QRIS</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QRIS PAYMENT & WA CONFIRMATION MODAL -->
+    <div id="qrisModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 hidden">
+        <div class="bg-kopken-card border border-kopken-accent/30 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative text-center">
+            <button onclick="closeQrisModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-kopken-accent/10 border border-kopken-accent/40 text-kopken-accent text-xl font-bold mb-3">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-1">Scan QRIS Pembayaran</h3>
+            <p class="text-xs text-gray-400 mb-4">Scan menggunakan m-Banking / e-Wallet (GoPay, OVO, Dana, BCA, dll)</p>
+
+            <!-- QRIS Mock Box -->
+            <div class="bg-white p-4 rounded-2xl mb-4 inline-block shadow-inner relative qris-pattern">
+                <div class="w-48 h-48 sm:w-56 sm:h-56 bg-white border-4 border-black p-2 flex flex-col items-center justify-center relative">
+                    <div class="absolute top-2 left-2 text-[10px] font-bold text-black">QRIS KYROVA</div>
+                    <div class="absolute top-2 right-2 text-[8px] font-bold text-red-600">NMID: ID1029384756</div>
+                    <div class="w-32 h-32 bg-black flex items-center justify-center text-white text-xs font-mono p-2 text-center rounded">
+                        [ MOCK QRIS CODE ]<br>KOPKEN JASTIP
+                    </div>
+                    <div class="absolute bottom-2 text-[10px] font-bold text-black tracking-widest">PT KOPKEN JASTIP INDONESIA</div>
+                </div>
+            </div>
+
+            <div class="bg-kopken-graydark p-3 rounded-xl mb-6 text-left border border-gray-800">
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-gray-400">Total Tagihan:</span>
+                    <span id="qrisTotalAmount" class="font-bold text-kopken-accent">Rp 0</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-gray-400">Status Toko:</span>
+                    <span class="font-bold text-emerald-400">Siap Diproses</span>
+                </div>
+            </div>
+
+            <button onclick="confirmToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm">
+                <i class="fa-brands fa-whatsapp text-lg"></i>
+                <span>Konfirmasi Pesanan ke WhatsApp</span>
+            </button>
+            <p class="text-[10px] text-gray-400 mt-2">Setelah transfer berhasil, klik tombol di atas untuk mengirim detail pesanan ke WhatsApp pemilik.</p>
+        </div>
+    </div>
+
+    <!-- WI-FI INFO MODAL -->
+    <div id="wifiModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 hidden">
+        <div class="bg-kopken-card border border-gray-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative text-center">
+            <button onclick="closeWifiModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-12 h-12 rounded-xl bg-kopken-accent/10 border border-kopken-accent/40 text-kopken-accent text-lg flex items-center justify-center mx-auto mb-3">
+                <i class="fa-solid fa-wifi"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1">Informasi Wi-Fi Toko</h3>
+            <p class="text-xs text-gray-400 mb-4">Gunakan Wi-Fi gratis saat menunggu pesanan.</p>
+
+            <div class="bg-kopken-graydark p-4 rounded-2xl border border-gray-800 space-y-3 text-left mb-4">
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-gray-400">Nama Wi-Fi (SSID)</span>
+                    <div id="wifiSsidDisplay" class="font-mono text-sm font-bold text-white mt-0.5">KYROVA_HOTSPOT</div>
+                </div>
+                <div>
+                    <span class="text-[10px] uppercase font-bold text-gray-400">Password Wi-Fi</span>
+                    <div id="wifiPassDisplay" class="font-mono text-sm font-bold text-kopken-accent mt-0.5">kopikenangan2026</div>
+                </div>
+            </div>
+
+            <button onclick="copyWifiInfo()" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2.5 rounded-xl text-xs transition border border-gray-700">
+                <i class="fa-regular fa-copy mr-1.5"></i> Salin Info Wi-Fi
+            </button>
+        </div>
+    </div>
+
+    <!-- ADMIN PIN VERIFICATION MODAL -->
+    <div id="adminPinModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 hidden">
+        <div class="bg-kopken-card border border-kopken-accent/40 rounded-3xl max-w-sm w-full p-6 sm:p-8 shadow-2xl relative text-center">
+            <button onclick="closeAdminPinModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-14 h-14 rounded-2xl bg-kopken-accent/10 border border-kopken-accent/40 text-kopken-accent text-xl flex items-center justify-center mx-auto mb-3">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-1">Akses Khusus Admin</h3>
+            <p class="text-xs text-gray-400 mb-4">Masukkan PIN Admin untuk masuk ke panel pengaturan (Default PIN: 1234)</p>
+            
+            <form onsubmit="verifyAdminPin(event)" class="space-y-4">
+                <input type="password" id="adminPinInput" required placeholder="Masukkan PIN (cth: 1234)" maxlength="10"
+                    class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 text-center tracking-widest text-lg text-white focus:outline-none focus:border-kopken-accent transition">
+                <button type="submit" class="w-full bg-kopken-accent hover:bg-amber-400 text-black font-bold py-3 px-4 rounded-xl shadow-lg transition text-sm">
+                    Buka Panel Admin
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL MODAL (WITH MENU ADD, EDIT, DELETE & GALLERY UPLOAD) -->
+    <div id="adminModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 hidden">
+        <div class="bg-kopken-card border border-kopken-accent/40 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[92vh] flex flex-col">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-12 h-12 rounded-xl bg-kopken-accent/10 border border-kopken-accent/40 text-kopken-accent text-xl flex items-center justify-center">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Panel Pengaturan Admin</h3>
+                    <p class="text-xs text-gray-400">Kelola menu baru, edit, hapus, unggah foto galeri, harga, PIN, dan operasional toko.</p>
+                </div>
+            </div>
+
+            <!-- Admin Tabs Navigation -->
+            <div class="flex gap-2 border-b border-gray-800 pb-3 mb-4 overflow-x-auto no-scrollbar">
+                <button onclick="switchAdminTab('menu')" id="tabBtnMenu" class="px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-accent text-black transition whitespace-nowrap">Kelola & Tambah Menu</button>
+                <button onclick="switchAdminTab('pricing')" id="tabBtnPricing" class="px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-graydark border border-gray-700 text-gray-300 hover:text-white transition whitespace-nowrap">Atur Harga Cepat</button>
+                <button onclick="switchAdminTab('settings')" id="tabBtnSettings" class="px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-graydark border border-gray-700 text-gray-300 hover:text-white transition whitespace-nowrap">Pengaturan Toko, Wi-Fi & PIN</button>
+            </div>
+
+            <!-- Admin Tab 1: Kelola & Tambah Menu (CRUD + Gallery Upload) -->
+            <div id="adminTabMenu" class="flex-grow overflow-y-auto space-y-4 pr-1">
+                <!-- Add / Edit Menu Form Card -->
+                <div class="bg-kopken-graydark border border-gray-800 p-4 rounded-2xl">
+                    <h4 id="menuFormTitle" class="font-bold text-sm text-white mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-kopken-accent"></i> Tambah Menu Baru
+                    </h4>
+                    <form id="menuForm" onsubmit="handleMenuFormSubmit(event)" class="space-y-3">
+                        <input type="hidden" id="editMenuId" value="">
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-300 uppercase mb-1">Nama Menu</label>
+                                <input type="text" id="adminMenuName" required placeholder="Cth: Taro Ice Signature" 
+                                    class="w-full bg-black border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-kopken-accent">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-300 uppercase mb-1">Kategori</label>
+                                <select id="adminMenuCategory" required class="w-full bg-black border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-kopken-accent">
+                                    <option value="Baru!">Baru!</option>
+                                    <option value="Promo & Combo">Promo & Combo</option>
+                                    <option value="Coffee">Coffee</option>
+                                    <option value="Non Coffee">Non Coffee</option>
+                                    <option value="Kenangan Frappe">Kenangan Frappe</option>
+                                    <option value="Makanan">Makanan</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-300 uppercase mb-1">Harga (Rp)</label>
+                                <input type="number" id="adminMenuPrice" required placeholder="Cth: 25000" min="1000" 
+                                    class="w-full bg-black border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-kopken-accent">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-300 uppercase mb-1">Foto Menu (Dari Galeri HP/PC)</label>
+                                <input type="file" id="adminMenuImageFile" accept="image/*" onchange="previewImageFromFile(event)" 
+                                    class="w-full bg-black border border-gray-700 rounded-xl px-3 py-1.5 text-[11px] text-gray-300 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-kopken-accent file:text-black hover:file:bg-amber-400">
+                            </div>
+                        </div>
+
+                        <!-- Image Preview Box -->
+                        <div class="flex items-center gap-3 pt-1">
+                            <div class="w-14 h-14 bg-black border border-gray-700 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0">
+                                <img id="adminImagePreview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                                <i id="adminImagePlaceholder" class="fa-solid fa-image text-gray-600 text-lg"></i>
+                            </div>
+                            <span class="text-[11px] text-gray-400">Format gambar akan otomatis disesuaikan untuk katalog menu.</span>
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="menuFormSubmitBtn" class="bg-kopken-accent hover:bg-amber-400 text-black font-bold px-4 py-2 rounded-xl text-xs transition shadow">
+                                Simpan Menu Baru
+                            </button>
+                            <button type="button" id="menuFormCancelBtn" onclick="resetMenuForm()" class="bg-gray-800 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition hidden">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Existing Menu List (With Edit & Delete) -->
+                <div>
+                    <h4 class="font-bold text-xs text-gray-300 uppercase tracking-wider mb-2">Daftar Menu Aktif</h4>
+                    <div id="adminMenuList" class="space-y-2">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tab 2: Atur Harga Cepat -->
+            <div id="adminTabPricing" class="flex-grow overflow-y-auto space-y-3 pr-1 hidden">
+                <p class="text-xs text-gray-400 mb-2">Ubah harga jual menu Kopi Kenangan secara cepat di bawah ini:</p>
+                <div id="adminPriceList" class="space-y-2">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Admin Tab 3: Pengaturan Toko & Wi-Fi & PIN -->
+            <div id="adminTabSettings" class="flex-grow overflow-y-auto space-y-4 pr-1 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Status Toko (Online / Offline)</label>
+                    <select id="adminStoreStatus" class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-kopken-accent transition">
+                        <option value="online">Online (Buka & Bisa Order)</option>
+                        <option value="offline">Offline (Tutup / Istirahat)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Nomor WhatsApp Pemilik (Untuk Konfirmasi Order)</label>
+                    <input type="text" id="adminOwnerWa" placeholder="Cth: 6281234567890" 
+                        class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-kopken-accent transition">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">SSID Wi-Fi</label>
+                        <input type="text" id="adminWifiSsid" class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-kopken-accent transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Password Wi-Fi</label>
+                        <input type="text" id="adminWifiPass" class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-kopken-accent transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Ubah PIN Admin Baru (Opsional)</label>
+                    <input type="text" id="adminNewPin" placeholder="Isi jika ingin mengganti PIN (cth: 5678)" 
+                        class="w-full bg-kopken-graydark border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-kopken-accent transition">
+                </div>
+            </div>
+
+            <!-- Admin Footer Save Button -->
+            <div class="pt-4 mt-4 border-t border-gray-800 flex justify-end gap-3">
+                <button onclick="closeAdminModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-gray-800 text-gray-300 hover:text-white transition">Tutup</button>
+                <button onclick="saveAdminSettings()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-kopken-accent hover:bg-amber-400 text-black transition shadow">Simpan Pengaturan Toko</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM TOAST MESSAGE BOX -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-kopken-card border border-kopken-accent/40 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-kopken-accent text-lg"></i>
+        <div>
+            <h5 id="toastTitle" class="font-bold text-xs">Berhasil</h5>
+            <p id="toastDesc" class="text-[11px] text-gray-300">Aksi berhasil dilakukan.</p>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA STORES DI DKI JAKARTA & SEKITARNYA ---
+        const jakartaStores = [
+            { id: 1, name: "Kopi Kenangan - Grand Indonesia", address: "Mall Grand Indonesia, Lt. 3, Menteng, Jakarta Pusat" },
+            { id: 2, name: "Kopi Kenangan - Mall Kelapa Gading 3", address: "Mall Kelapa Gading 3, Lt. Dasar, Kelapa Gading, Jakarta Utara" },
+            { id: 3, name: "Kopi Kenangan - Senayan City", address: "Senayan City, Lower Ground, Tanah Abang, Jakarta Selatan" },
+            { id: 4, name: "Kopi Kenangan - Lippo Mall Puri", address: "Lippo Mall Puri, Lantai Lower Ground Floor, Jl. Puri Indah Boulevard, Jakarta Barat" },
+            { id: 5, name: "Kopi Kenangan - Kota Kasablanka", address: "Kota Kasablanka, Lt. LG, Tebet, Jakarta Selatan" },
+            { id: 6, name: "Kopi Kenangan - Cipinang Indah Mall", address: "Cipinang Indah Mall, Lt. Dasar, Duren Sawit, Jakarta Timur" },
+            { id: 7, name: "Kopi Kenangan - Central Park Mall", address: "Central Park Mall, Lt. LG, Grogol Petamburan, Jakarta Barat" },
+            { id: 8, name: "Kopi Kenangan - Pacific Place", address: "Pacific Place Mall, Lt. 4, SCBD, Jakarta Selatan" },
+            { id: 9, name: "Kopi Kenangan - Gandaria City", address: "Gandaria City, Lt. LG, Kebayoran Lama, Jakarta Selatan" },
+            { id: 10, name: "Kopi Kenangan - Pondok Indah Mall 1", address: "PIM 1, Lt. 2, Pondok Indah, Jakarta Selatan" },
+            { id: 11, name: "Kopi Kenangan - Plaza Senayan", address: "Plaza Senayan, Lt. 3, Gelora, Jakarta Pusat" },
+            { id: 12, name: "Kopi Kenangan - Kuningan City", address: "Kuningan City, Lt. GF, Setiabudi, Jakarta Selatan" },
+            { id: 13, name: "Kopi Kenangan - Ruko Cleon Park Cakung", address: "Ruko Cleon Park, Cakung, Jakarta Timur" },
+            { id: 14, name: "Kopi Kenangan - AEON Mall Jakarta Garden City", address: "AEON Mall JGC, Lt. 1, Cakung Timur, Jakarta Timur" },
+            { id: 15, name: "Kopi Kenangan - Ruko Metland Cakung", address: "Ruko Maison De Wisteria Metland, Blok Collins, Ujung Menteng, Cakung, Jakarta Timur" },
+            { id: 16, name: "Kopi Kenangan - Living Plaza Kota Harapan Indah", address: "Living Plaza Kota Harapan Indah, GF, Medan Satria, Jakarta Timur / Bekasi" },
+            { id: 17, name: "Kopi Kenangan - Ruko Symphonie Harapan Indah", address: "Ruko Symphonie Harapan Indah, Blok HX1, Tarumajaya" },
+            { id: 18, name: "Kopi Kenangan - Green Pramuka Square", address: "Green Pramuka Square, Lt. GF, Cempaka Putih, Jakarta Pusat" },
+            { id: 19, name: "Kopi Kenangan - Mall Ambassador", address: "Mall Ambassador, Lt. 4, Setiabudi, Jakarta Selatan" },
+            { id: 20, name: "Kopi Kenangan - Baywalk Mall Pluit", address: "Baywalk Mall, Lt. 2, Pluit, Penjaringan, Jakarta Utara" },
+            { id: 21, name: "Kopi Kenangan - Cibubur Junction", address: "Cibubur Junction, Lt. LG, Ciracas, Jakarta Timur" }
+        ];
+
+        // --- KATALOG MENU UTAMA ---
+        const defaultMenuItems = [
+            { id: 1, name: "Taro Cloud Matcha", category: "Baru!", price: 25000, img: "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80" },
+            { id: 2, name: "Taro Milk", category: "Baru!", price: 22000, img: "https://images.unsplash.com/photo-1579887829021-e35492985f52?auto=format&fit=crop&w=600&q=80" },
+            { id: 3, name: "Taro Cloud Latte", category: "Baru!", price: 25000, img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80" },
+            { id: 4, name: "Taro Cloud Milk Tea", category: "Baru!", price: 22000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=600&q=80" },
+            { id: 5, name: "Classic Peanut Butter Toast", category: "Makanan", price: 21000, img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80" },
+            { id: 6, name: "Choco Peanut Butter Toast", category: "Makanan", price: 23000, img: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=600&q=80" },
+            { id: 7, name: "Bundle Kenangan Berdua", category: "Promo & Combo", price: 59000, img: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80" },
+            { id: 8, name: "Combo Hemat Mantan + Toast", category: "Promo & Combo", price: 39000, img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80" },
+            { id: 9, name: "Kopi Kenangan Mantan", category: "Coffee", price: 22000, img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80" },
+            { id: 10, name: "Avocatto", category: "Coffee", price: 32000, img: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80" },
+            { id: 11, name: "Americano / Black Coffee", category: "Coffee", price: 18000, img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80" },
+            { id: 12, name: "Kopi Dolce", category: "Coffee", price: 26000, img: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80" },
+            { id: 13, name: "Thai Tea", category: "Non Coffee", price: 24000, img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80" },
+            { id: 14, name: "Chocolate", category: "Non Coffee", price: 26000, img: "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=600&q=80" },
+            { id: 15, name: "Matcha Latte", category: "Non Coffee", price: 28000, img: "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80" },
+            { id: 16, name: "Cookies & Cream Frappe", category: "Kenangan Frappe", price: 35000, img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80" },
+            { id: 17, name: "Avocado Coffee Frappe", category: "Kenangan Frappe", price: 36000, img: "https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        // --- APPLICATION STATE ---
+        let appState = {
+            custName: localStorage.getItem('kyrova_custName') || '',
+            custPhone: localStorage.getItem('kyrova_custPhone') || '',
+            selectedStore: JSON.parse(localStorage.getItem('kyrova_selectedStore')) || jakartaStores[3],
+            storeStatus: localStorage.getItem('kyrova_storeStatus') || 'online',
+            ownerWa: localStorage.getItem('kyrova_ownerWa') || '6281234567890',
+            wifiSsid: localStorage.getItem('kyrova_wifiSsid') || 'KYROVA_HOTSPOT',
+            wifiPass: localStorage.getItem('kyrova_wifiPass') || 'kopikenangan2026',
+            adminPin: localStorage.getItem('kyrova_adminPin') || '1234',
+            menuItems: JSON.parse(localStorage.getItem('kyrova_menuItems')) || defaultMenuItems,
+            cart: [],
+            currentFilter: 'Baru!'
+        };
+
+        let tempUploadedImageBase64 = '';
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            renderStoreList(jakartaStores);
+            checkInitialSetup();
+            renderMenu();
+            updateCartBadge();
+            loadAdminValues();
+            checkStoreStatusUI();
+            updateStoreDisplayUI();
+        };
+
+        function checkInitialSetup() {
+            if (!appState.custName || !appState.custPhone) {
+                document.getElementById('welcomeModal').classList.remove('hidden');
+            } else {
+                document.getElementById('welcomeModal').classList.add('hidden');
+            }
+        }
+
+        function openWelcomeModal() {
+            document.getElementById('custName').value = appState.custName;
+            document.getElementById('custPhone').value = appState.custPhone;
+            document.getElementById('welcomeModal').classList.remove('hidden');
+        }
+
+        function renderStoreList(stores) {
+            const container = document.getElementById('storeListContainer');
+            container.innerHTML = '';
+            stores.forEach(store => {
+                const isSelected = appState.selectedStore && appState.selectedStore.id === store.id;
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-xl border cursor-pointer transition flex items-center justify-between ${isSelected ? 'border-kopken-accent bg-kopken-accent/10 text-white' : 'border-gray-800 bg-kopken-graydark hover:border-gray-600 text-gray-300'}`;
+                div.onclick = () => selectStoreObject(store);
+                div.innerHTML = `
+                    <div>
+                        <h5 class="font-bold text-xs sm:text-sm text-white">${store.name}</h5>
+                        <p class="text-[10px] text-gray-400 mt-0.5">${store.address}</p>
+                    </div>
+                    ${isSelected ? '<i class="fa-solid fa-circle-check text-kopken-accent"></i>' : '<i class="fa-regular fa-circle text-gray-600"></i>'}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        let temporarySelectedStore = null;
+        function selectStoreObject(store) {
+            temporarySelectedStore = store;
+            const allItems = document.querySelectorAll('#storeListContainer > div');
+            allItems.forEach(el => {
+                el.classList.remove('border-kopken-accent', 'bg-kopken-accent/10', 'text-white');
+                el.classList.add('border-gray-800', 'bg-kopken-graydark', 'text-gray-300');
+            });
+            event.currentTarget.classList.remove('border-gray-800', 'bg-kopken-graydark', 'text-gray-300');
+            event.currentTarget.classList.add('border-kopken-accent', 'bg-kopken-accent/10', 'text-white');
+        }
+
+        function filterStores() {
+            const query = document.getElementById('storeSearchInput').value.toLowerCase();
+            const filtered = jakartaStores.filter(s => s.name.toLowerCase().includes(query) || s.address.toLowerCase().includes(query));
+            renderStoreList(filtered);
+        }
+
+        function saveInitialData(e) {
+            e.preventDefault();
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+
+            if (temporarySelectedStore) {
+                appState.selectedStore = temporarySelectedStore;
+            }
+
+            appState.custName = name;
+            appState.custPhone = phone;
+
+            localStorage.setItem('kyrova_custName', appState.custName);
+            localStorage.setItem('kyrova_custPhone', appState.custPhone);
+            localStorage.setItem('kyrova_selectedStore', JSON.stringify(appState.selectedStore));
+
+            document.getElementById('welcomeModal').classList.add('hidden');
+            updateStoreDisplayUI();
+            showToast("Berhasil", "Data pemesan & store berhasil disimpan!", "success");
+        }
+
+        function updateStoreDisplayUI() {
+            if (appState.selectedStore) {
+                document.getElementById('headerStoreName').innerText = appState.selectedStore.name;
+            }
+        }
+
+        function checkStoreStatusUI() {
+            const banner = document.getElementById('storeClosedBanner');
+            if (appState.storeStatus === 'offline') {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        // --- MENU RENDER & FILTER ---
+        function filterCategory(category) {
+            appState.currentFilter = category;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.className = "cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-card border border-gray-800 text-gray-300 hover:text-white transition whitespace-nowrap";
+            });
+            event.currentTarget.className = "cat-btn px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-accent text-black transition whitespace-nowrap";
+            
+            document.getElementById('categoryTitleHeader').innerText = category;
+            document.getElementById('categorySubtitleDesc').innerText = `Pilihan menu terbaik untuk kategori ${category} Kopi Kenangan`;
+            renderMenu();
+        }
+
+        function renderMenu() {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = '';
+            
+            const filtered = appState.menuItems.filter(item => item.category === appState.currentFilter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fa-solid fa-mug-hot text-4xl text-gray-700 mb-2"></i>
+                        <p class="text-xs text-gray-400">Belum ada menu dalam kategori ini.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-kopken-card border border-gray-800 rounded-3xl overflow-hidden shadow-lg hover:border-kopken-accent/50 transition flex flex-col group";
+                card.innerHTML = `
+                    <div class="relative overflow-hidden h-44 bg-kopken-graydark flex items-center justify-center">
+                        <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x300/1e1e1e/D4AF37?text=Kopi+Kenangan'">
+                        <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-[10px] font-semibold px-2.5 py-1 rounded-full text-kopken-accent border border-kopken-accent/30">${item.category}</span>
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <h4 class="font-bold text-white text-base mb-1">${item.name}</h4>
+                        <div class="mt-auto pt-3 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-gray-400 block">Harga</span>
+                                <span class="font-extrabold text-kopken-accent text-sm sm:text-base">Rp ${item.price.toLocaleString('id-ID')}</span>
+                            </div>
+                            <button onclick="openCustomModal(${item.id})" class="bg-kopken-graydark hover:bg-kopken-accent hover:text-black text-white font-bold p-2.5 rounded-xl transition border border-gray-700 text-xs flex items-center gap-1.5 shadow">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Pesan</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- CUSTOMIZATION MODAL ---
+        let currentModalItem = null;
+        let currentModalQtyVal = 1;
+
+        function openCustomModal(itemId) {
+            currentModalItem = appState.menuItems.find(i => i.id === itemId);
+            if (!currentModalItem) return;
+
+            currentModalQtyVal = 1;
+            document.getElementById('modalItemId').value = currentModalItem.id;
+            document.getElementById('modalItemName').innerText = currentModalItem.name;
+            document.getElementById('modalItemCategory').innerText = currentModalItem.category;
+            document.getElementById('modalItemImg').src = currentModalItem.img;
+            document.getElementById('modalItemPrice').innerText = `Rp ${currentModalItem.price.toLocaleString('id-ID')}`;
+            document.getElementById('modalQty').innerText = currentModalQtyVal;
+
+            document.querySelector('input[name="itemSize"][value="Reguler"]').checked = true;
+            document.querySelector('input[name="itemSugar"][value="Normal Sugar"]').checked = true;
+            document.querySelector('input[name="itemIce"][value="Normal Ice"]').checked = true;
+            document.getElementById('itemNote').value = '';
+
+            updateModalPrice();
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeCustomModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        function adjustModalQty(change) {
+            currentModalQtyVal += change;
+            if (currentModalQtyVal < 1) currentModalQtyVal = 1;
+            document.getElementById('modalQty').innerText = currentModalQtyVal;
+            updateModalPrice();
+        }
+
+        function updateModalPrice() {
+            if (!currentModalItem) return;
+            const size = document.querySelector('input[name="itemSize"]:checked').value;
+            let unitPrice = currentModalItem.price;
+            if (size === 'Large') unitPrice += 5000;
+            const total = unitPrice * currentModalQtyVal;
+            document.getElementById('modalTotalPrice').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        }
+
+        function addToCartFromModal(e) {
+            e.preventDefault();
+            if (!currentModalItem) return;
+
+            const size = document.querySelector('input[name="itemSize"]:checked').value;
+            const sugar = document.querySelector('input[name="itemSugar"]:checked').value;
+            const ice = document.querySelector('input[name="itemIce"]:checked').value;
+            const note = document.getElementById('itemNote').value.trim();
+
+            let unitPrice = currentModalItem.price;
+            if (size === 'Large') unitPrice += 5000;
+
+            const cartItem = {
+                cartId: Date.now() + Math.random(),
+                id: currentModalItem.id,
+                name: currentModalItem.name,
+                img: currentModalItem.img,
+                size: size,
+                sugar: sugar,
+                ice: ice,
+                note: note,
+                qty: currentModalQtyVal,
+                unitPrice: unitPrice,
+                totalPrice: unitPrice * currentModalQtyVal
+            };
+
+            appState.cart.push(cartItem);
+            updateCartBadge();
+            closeCustomModal();
+            showToast("Keranjang", `${currentModalItem.name} berhasil ditambahkan!`, "success");
+        }
+
+        // --- CART & CHECKOUT ---
+        function toggleCartDrawer(open) {
+            const drawer = document.getElementById('cartDrawer');
+            if (open) {
+                renderCartItems();
+                drawer.classList.remove('hidden');
+            } else {
+                drawer.classList.add('hidden');
+            }
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            const totalQty = appState.cart.reduce((sum, item) => sum + item.qty, 0);
+            if (totalQty > 0) {
+                badge.innerText = totalQty;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderCartItems() {
+            document.getElementById('cartCustSummary').innerText = appState.custName || '-';
+            document.getElementById('cartPhoneSummary').innerText = appState.custPhone || '-';
+            document.getElementById('cartStoreSummary').innerText = appState.selectedStore ? appState.selectedStore.name : 'Belum Dipilih';
+
+            const list = document.getElementById('cartItemsList');
+            list.innerHTML = '';
+
+            if (appState.cart.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fa-solid fa-mug-saucer text-4xl text-gray-700 mb-3"></i>
+                        <p class="text-xs text-gray-400">Keranjang pesanan masih kosong.</p>
+                    </div>
+                `;
+                document.getElementById('cartSubtotal').innerText = 'Rp 0';
+                document.getElementById('cartGrandTotal').innerText = 'Rp 0';
+                return;
+            }
+
+            let subtotal = 0;
+            appState.cart.forEach((item, index) => {
+                subtotal += item.totalPrice;
+                const div = document.createElement('div');
+                div.className = "bg-kopken-graydark border border-gray-800 rounded-2xl p-3 flex gap-3 items-center";
+                div.innerHTML = `
+                    <img src="${item.img}" class="w-14 h-14 object-cover rounded-xl border border-gray-700">
+                    <div class="flex-grow">
+                        <h5 class="font-bold text-white text-xs">${item.name}</h5>
+                        <p class="text-[10px] text-gray-400">${item.size} | ${item.sugar} | ${item.ice}</p>
+                        ${item.note ? `<p class="text-[10px] text-amber-300 italic">Catatan: ${item.note}</p>` : ''}
+                        <div class="flex justify-between items-center mt-1.5">
+                            <span class="text-xs font-bold text-kopken-accent">Rp ${item.totalPrice.toLocaleString('id-ID')}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-300">x${item.qty}</span>
+                                <button onclick="removeCartItem(${index})" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            const serviceFee = 5000;
+            const grandTotal = subtotal + serviceFee;
+
+            document.getElementById('cartSubtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+            document.getElementById('cartServiceFee').innerText = `Rp ${serviceFee.toLocaleString('id-ID')}`;
+            document.getElementById('cartGrandTotal').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+        }
+
+        function removeCartItem(index) {
+            appState.cart.splice(index, 1);
+            updateCartBadge();
+            renderCartItems();
+        }
+
+        function proceedToCheckout() {
+            if (appState.storeStatus === 'offline') {
+                showToast("Toko Tutup", "Maaf, toko sedang offline. Anda belum dapat melakukan checkout.", "error");
+                return;
+            }
+            if (!appState.custName || !appState.custPhone || !appState.selectedStore) {
+                toggleCartDrawer(false);
+                openWelcomeModal();
+                showToast("Lengkapi Data", "Silakan lengkapi data nama, nomor WhatsApp, dan store terlebih dahulu.", "error");
+                return;
+            }
+            if (appState.cart.length === 0) {
+                showToast("Keranjang Kosong", "Tambahkan minimal 1 menu sebelum checkout.", "error");
+                return;
+            }
+
+            let subtotal = appState.cart.reduce((sum, item) => sum + item.totalPrice, 0);
+            let grandTotal = subtotal + 5000;
+
+            document.getElementById('qrisTotalAmount').innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+            toggleCartDrawer(false);
+            document.getElementById('qrisModal').classList.remove('hidden');
+        }
+
+        function closeQrisModal() {
+            document.getElementById('qrisModal').classList.add('hidden');
+        }
+
+        // --- WHATSAPP CONFIRMATION ---
+        function confirmToWhatsApp() {
+            let subtotal = appState.cart.reduce((sum, item) => sum + item.totalPrice, 0);
+            let grandTotal = subtotal + 5000;
+
+            let itemsText = appState.cart.map((item, idx) => {
+                return `${idx + 1}. *${item.name}* (x${item.qty})\n   - Ukuran: ${item.size}\n   - Gula: ${item.sugar}\n   - Es: ${item.ice}${item.note ? `\n   - Catatan: ${item.note}` : ''}\n   - Subtotal: Rp ${item.totalPrice.toLocaleString('id-ID')}`;
+            }).join('\n\n');
+
+            let message = `Halo Admin KYROVA, saya ingin memesan Kopi Kenangan:\n\n` +
+                          `👤 *Nama Pemesan:* ${appState.custName}\n` +
+                          `📱 *No WhatsApp:* ${appState.custPhone}\n` +
+                          `📍 *Store Tujuan:* ${appState.selectedStore.name}\n\n` +
+                          `📋 *DETAIL PESANAN:*\n${itemsText}\n\n` +
+                          `-------------------\n` +
+                          `Subtotal Item: Rp ${subtotal.toLocaleString('id-ID')}\n` +
+                          `Biaya Jastip & Layanan: Rp 5.000\n` +
+                          `💰 *TOTAL PEMBAYARAN: Rp ${grandTotal.toLocaleString('id-ID')}*\n` +
+                          `-------------------\n\n` +
+                          `Bukti transfer QRIS telah saya bayar. Mohon segera diproses ya kak! Terima kasih.`;
+
+            const encodedMsg = encodeURIComponent(message);
+            const waUrl = `https://wa.me/${appState.ownerWa}?text=${encodedMsg}`;
+            window.open(waUrl, '_blank');
+        }
+
+        // --- WI-FI MODAL ---
+        function openWifiModal() {
+            document.getElementById('wifiSsidDisplay').innerText = appState.wifiSsid;
+            document.getElementById('wifiPassDisplay').innerText = appState.wifiPass;
+            document.getElementById('wifiModal').classList.remove('hidden');
+        }
+
+        function closeWifiModal() {
+            document.getElementById('wifiModal').classList.add('hidden');
+        }
+
+        function copyWifiInfo() {
+            const text = `Wi-Fi SSID: ${appState.wifiSsid}\nPassword: ${appState.wifiPass}`;
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Berhasil Disalin", "Informasi Wi-Fi berhasil disalin ke clipboard!", "success");
+            } catch (err) {
+                showToast("Gagal", "Tidak dapat menyalin teks.", "error");
+            }
+            document.body.removeChild(textArea);
+            closeWifiModal();
+        }
+
+        // --- ADMIN PIN PROTECTION & PANEL ---
+        function openAdminPinModal() {
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('adminPinModal').classList.remove('hidden');
+        }
+
+        function closeAdminPinModal() {
+            document.getElementById('adminPinModal').classList.add('hidden');
+            document.getElementById('adminPinInput').value = '';
+        }
+
+        function verifyAdminPin(e) {
+            e.preventDefault();
+            const enteredPin = document.getElementById('adminPinInput').value.trim();
+            if (enteredPin === appState.adminPin) {
+                closeAdminPinModal();
+                loadAdminValues();
+                document.getElementById('adminModal').classList.remove('hidden');
+                showToast("Akses Diterima", "Selamat datang di Panel Admin KYROVA", "success");
+            } else {
+                showToast("PIN Salah", "PIN Admin yang Anda masukkan salah! (Default: 1234)", "error");
+                document.getElementById('adminPinInput').value = '';
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function switchAdminTab(tabName) {
+            const btnMenu = document.getElementById('tabBtnMenu');
+            const btnPricing = document.getElementById('tabBtnPricing');
+            const btnSettings = document.getElementById('tabBtnSettings');
+            
+            const tabMenu = document.getElementById('adminTabMenu');
+            const tabPricing = document.getElementById('adminTabPricing');
+            const tabSettings = document.getElementById('adminTabSettings');
+
+            // Reset tabs
+            btnMenu.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-graydark border border-gray-700 text-gray-300 hover:text-white transition whitespace-nowrap";
+            btnPricing.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-graydark border border-gray-700 text-gray-300 hover:text-white transition whitespace-nowrap";
+            btnSettings.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-graydark border border-gray-700 text-gray-300 hover:text-white transition whitespace-nowrap";
+            
+            tabMenu.classList.add('hidden');
+            tabPricing.classList.add('hidden');
+            tabSettings.classList.add('hidden');
+
+            if (tabName === 'menu') {
+                btnMenu.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-accent text-black transition whitespace-nowrap";
+                tabMenu.classList.remove('hidden');
+            } else if (tabName === 'pricing') {
+                btnPricing.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-accent text-black transition whitespace-nowrap";
+                tabPricing.classList.remove('hidden');
+            } else if (tabName === 'settings') {
+                btnSettings.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-kopken-accent text-black transition whitespace-nowrap";
+                tabSettings.classList.remove('hidden');
+            }
+        }
+
+        // --- GALLERY IMAGE UPLOAD & PREVIEW (FileReader) ---
+        function previewImageFromFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempUploadedImageBase64 = e.target.result;
+                    const previewImg = document.getElementById('adminImagePreview');
+                    const placeholder = document.getElementById('adminImagePlaceholder');
+                    previewImg.src = tempUploadedImageBase64;
+                    previewImg.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function loadAdminValues() {
+            // Render Admin Menu CRUD List
+            const menuList = document.getElementById('adminMenuList');
+            menuList.innerHTML = '';
+            appState.menuItems.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-black border border-gray-800 p-3 rounded-xl gap-3";
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${item.img}" class="w-10 h-10 object-cover rounded-lg border border-gray-700 bg-gray-800">
+                        <div>
+                            <h5 class="font-bold text-white text-xs">${item.name}</h5>
+                            <span class="text-[10px] text-kopken-accent">${item.category} • Rp ${item.price.toLocaleString('id-ID')}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="editMenuItem(${item.id})" class="bg-gray-800 hover:bg-gray-700 text-amber-400 px-2.5 py-1.5 rounded-lg text-xs transition" title="Edit">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteMenuItem(${item.id})" class="bg-gray-800 hover:bg-red-900/40 text-red-400 px-2.5 py-1.5 rounded-lg text-xs transition" title="Hapus">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                menuList.appendChild(div);
+            });
+
+            // Render Quick Pricing List
+            const priceList = document.getElementById('adminPriceList');
+            priceList.innerHTML = '';
+            appState.menuItems.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-kopken-graydark border border-gray-800 p-3 rounded-xl gap-3";
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${item.img}" class="w-10 h-10 object-cover rounded-lg border border-gray-700">
+                        <div>
+                            <h5 class="font-bold text-white text-xs">${item.name}</h5>
+                            <span class="text-[10px] text-gray-400">${item.category}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 font-bold">Rp</span>
+                        <input type="number" id="quickPrice_${item.id}" value="${item.price}" 
+                            class="w-28 bg-black border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-kopken-accent font-bold">
+                    </div>
+                `;
+                priceList.appendChild(div);
+            });
+
+            document.getElementById('adminStoreStatus').value = appState.storeStatus;
+            document.getElementById('adminOwnerWa').value = appState.ownerWa;
+            document.getElementById('adminWifiSsid').value = appState.wifiSsid;
+            document.getElementById('adminWifiPass').value = appState.wifiPass;
+            document.getElementById('adminNewPin').value = '';
+        }
+
+        // --- MENU FORM SUBMIT (ADD / EDIT) ---
+        function handleMenuFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editMenuId').value;
+            const name = document.getElementById('adminMenuName').value.trim();
+            const category = document.getElementById('adminMenuCategory').value;
+            const price = parseInt(document.getElementById('adminMenuPrice').value);
+
+            if (!name || isNaN(price)) {
+                showToast("Error", "Mohon isi nama menu dan harga dengan benar.", "error");
+                return;
+            }
+
+            if (editId) {
+                // EDIT EXISTING
+                const item = appState.menuItems.find(i => i.id == editId);
+                if (item) {
+                    item.name = name;
+                    item.category = category;
+                    item.price = price;
+                    if (tempUploadedImageBase64) {
+                        item.img = tempUploadedImageBase64;
+                    }
+                }
+                showToast("Berhasil", "Menu berhasil diperbarui!", "success");
+            } else {
+                // ADD NEW
+                const newItem = {
+                    id: Date.now(),
+                    name: name,
+                    category: category,
+                    price: price,
+                    img: tempUploadedImageBase64 || 'https://placehold.co/400x300/1e1e1e/D4AF37?text=Kopi+Kenangan'
+                };
+                appState.menuItems.push(newItem);
+                showToast("Berhasil", "Menu baru berhasil ditambahkan!", "success");
+            }
+
+            localStorage.setItem('kyrova_menuItems', JSON.stringify(appState.menuItems));
+            resetMenuForm();
+            loadAdminValues();
+            renderMenu();
+        }
+
+        function editMenuItem(id) {
+            const item = appState.menuItems.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('editMenuId').value = item.id;
+            document.getElementById('adminMenuName').value = item.name;
+            document.getElementById('adminMenuCategory').value = item.category;
+            document.getElementById('adminMenuPrice').value = item.price;
+            
+            tempUploadedImageBase64 = item.img;
+            const previewImg = document.getElementById('adminImagePreview');
+            const placeholder = document.getElementById('adminImagePlaceholder');
+            previewImg.src = item.img;
+            previewImg.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+
+            document.getElementById('menuFormTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-kopken-accent"></i> Edit Menu: ${item.name}`;
+            document.getElementById('menuFormSubmitBtn').innerText = "Simpan Perubahan Menu";
+            document.getElementById('menuFormCancelBtn').classList.remove('hidden');
+
+            document.getElementById('adminTabMenu').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteMenuItem(id) {
+            appState.menuItems = appState.menuItems.filter(i => i.id !== id);
+            localStorage.setItem('kyrova_menuItems', JSON.stringify(appState.menuItems));
+            loadAdminValues();
+            renderMenu();
+            showToast("Dihapus", "Menu berhasil dihapus dari daftar.", "success");
+        }
+
+        function resetMenuForm() {
+            document.getElementById('menuForm').reset();
+            document.getElementById('editMenuId').value = '';
+            tempUploadedImageBase64 = '';
+            document.getElementById('adminImagePreview').classList.add('hidden');
+            document.getElementById('adminImagePlaceholder').classList.remove('hidden');
+            document.getElementById('menuFormTitle').innerHTML = `<i class="fa-solid fa-plus-circle text-kopken-accent"></i> Tambah Menu Baru`;
+            document.getElementById('menuFormSubmitBtn').innerText = "Simpan Menu Baru";
+            document.getElementById('menuFormCancelBtn').classList.add('hidden');
+        }
+
+        function saveAdminSettings() {
+            // Save Quick Pricing changes first
+            appState.menuItems.forEach(item => {
+                const input = document.getElementById(`quickPrice_${item.id}`);
+                if (input) {
+                    const newPrice = parseInt(input.value);
+                    if (!isNaN(newPrice) && newPrice > 0) {
+                        item.price = newPrice;
+                    }
+                }
+            });
+
+            appState.storeStatus = document.getElementById('adminStoreStatus').value;
+            appState.ownerWa = document.getElementById('adminOwnerWa').value.trim() || '6281234567890';
+            appState.wifiSsid = document.getElementById('adminWifiSsid').value.trim() || 'KYROVA_HOTSPOT';
+            appState.wifiPass = document.getElementById('adminWifiPass').value.trim() || 'kopikenangan2026';
+            
+            const newPin = document.getElementById('adminNewPin').value.trim();
+            if (newPin) {
+                appState.adminPin = newPin;
+                localStorage.setItem('kyrova_adminPin', appState.adminPin);
+            }
+
+            localStorage.setItem('kyrova_menuItems', JSON.stringify(appState.menuItems));
+            localStorage.setItem('kyrova_storeStatus', appState.storeStatus);
+            localStorage.setItem('kyrova_ownerWa', appState.ownerWa);
+            localStorage.setItem('kyrova_wifiSsid', appState.wifiSsid);
+            localStorage.setItem('kyrova_wifiPass', appState.wifiPass);
+
+            renderMenu();
+            checkStoreStatusUI();
+            closeAdminModal();
+            showToast("Sukses", "Pengaturan operasional, harga & PIN berhasil disimpan!", "success");
+        }
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(title, desc, type = 'success') {
+            const toast = document.getElementById('toast');
+            const titleEl = document.getElementById('toastTitle');
+            const descEl = document.getElementById('toastDesc');
+            const iconEl = document.getElementById('toastIcon');
+
+            titleEl.innerText = title;
+            descEl.innerText = desc;
+            if (type === 'error') {
+                iconEl.className = "fa-solid fa-triangle-exclamation text-red-500 text-lg";
+            } else {
+                iconEl.className = "fa-solid fa-circle-check text-kopken-accent text-lg";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
